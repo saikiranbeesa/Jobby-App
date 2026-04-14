@@ -27,6 +27,8 @@ class Jobs extends Component {
     searchInput: '',
     activeSalaryRangeId: '',
     employmentTypesChecked: [],
+    // ✅ new: locations selected via Hyderabad / Delhi checkboxes
+    selectedLocations: [],
   }
 
   componentDidMount() {
@@ -51,12 +53,29 @@ class Jobs extends Component {
   updateSalaryRangeId = activeSalaryRangeId =>
     this.setState({activeSalaryRangeId}, this.getJobs)
 
+  // ✅ new: toggle Hyderabad / Delhi in selectedLocations
+  updateLocationsChecked = location => {
+    this.setState(prevState => {
+      const {selectedLocations} = prevState
+      if (selectedLocations.includes(location)) {
+        return {
+          selectedLocations: selectedLocations.filter(
+            eachLocation => eachLocation !== location,
+          ),
+        }
+      }
+      return {selectedLocations: [...selectedLocations, location]}
+    })
+  }
+
   getJobs = async () => {
     this.setState({jobsApiStatus: apiStatusConstants.inProgress})
 
-    const {activeSalaryRangeId,
-    employmentTypesChecked,
-    searchInput} = this.state
+    const {
+      activeSalaryRangeId,
+      employmentTypesChecked,
+      searchInput,
+    } = this.state
     const employTypes = employmentTypesChecked.join(',')
     const jwtToken = Cookies.get('jwt_token')
     const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employTypes}&minimum_package=${activeSalaryRangeId}&search=${searchInput}`
@@ -163,6 +182,8 @@ class Jobs extends Component {
           activeSalaryRangeId={activeSalaryRangeId}
           updateEmploymentTypesChecked={this.updateEmploymentTypesChecked}
           employmentTypesChecked={employmentTypesChecked}
+          // ✅ new prop for Hyderabad / Delhi checkboxes
+          updateLocationsChecked={this.updateLocationsChecked}
         />
       </div>
     )
@@ -183,12 +204,21 @@ class Jobs extends Component {
   )
 
   renderJobsList = () => {
-    const {jobsList} = this.state
+    const {jobsList, selectedLocations} = this.state
+
+    // ✅ apply location filter (Hyderabad / Delhi) on the client side
+    const filteredJobs =
+      selectedLocations.length === 0
+        ? jobsList
+        : jobsList.filter(eachJob =>
+            selectedLocations.includes(eachJob.location),
+          )
+
     return (
       <>
-        {jobsList.length > 0 ? (
+        {filteredJobs.length > 0 ? (
           <ul className="jobs-list">
-            {jobsList.map(eachJob => (
+            {filteredJobs.map(eachJob => (
               <JobCard key={eachJob.id} jobDetails={eachJob} />
             ))}
           </ul>
@@ -256,4 +286,5 @@ class Jobs extends Component {
     )
   }
 }
+
 export default Jobs

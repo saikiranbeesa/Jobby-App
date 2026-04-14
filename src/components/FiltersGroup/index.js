@@ -1,6 +1,5 @@
 import './index.css'
 
-
 const employmentTypesList = [
   {
     label: 'Full Time',
@@ -17,6 +16,17 @@ const employmentTypesList = [
   {
     label: 'Internship',
     employmentTypeId: 'INTERNSHIP',
+  },
+]
+
+const locationsList = [
+  {
+    locationId: 'HYDERABAD',
+    label: 'Hyderabad',
+  },
+  {
+    locationId: 'DELHI',
+    label: 'Delhi',
   },
 ]
 
@@ -103,10 +113,40 @@ const FiltersGroup = props => {
     </>
   )
 
+  const renderLocationsList = () => {
+    const {updateLocationsChecked} = props
+
+    return locationsList.map(eachLocation => {
+      const onChangeLocation = () => updateLocationsChecked(eachLocation.label) // "Hyderabad" / "Delhi"
+
+      return (
+        <li className="fliters-list-item" key={eachLocation.locationId}>
+          <input
+            type="checkbox"
+            className="checkbox-input"
+            id={eachLocation.locationId}
+            onChange={onChangeLocation}
+          />
+          <label htmlFor={eachLocation.locationId} className="filter-label">
+            {eachLocation.label}
+          </label>
+        </li>
+      )
+    })
+  }
+
+  const renderLocations = () => (
+    <>
+      <h1 className="filter-heading">Location</h1>
+      <ul className="filters-list">{renderLocationsList()}</ul>
+    </>
+  )
+
   return (
     <div className="filters-group-container">
       {renderEmploymentTypes()}
       <hr className="separator" />
+      {renderLocations()}
       {renderSalaryRangesTypes()}
     </div>
   )
